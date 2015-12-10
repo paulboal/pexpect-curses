@@ -3,7 +3,7 @@ import sys
 import logging
 sys.path.append ("../../")
 
-from swearjar import swearjar
+import swearjar
 
 
 t = swearjar.SwearJar(cmd="./curses01.py")
