@@ -9,6 +9,7 @@ import struct
 import termios
 import array
 import logging
+import time
 
 logging.basicConfig(filename='example.log',level=logging.DEBUG)
 
@@ -30,12 +31,13 @@ MAXY,MAXX = s.getmaxyx()
 
 try:
 	s.addnstr(0,     0, center(WELCOME,MAXX), MAXX, curses.A_REVERSE)
-	s.addnstr(MAXY-2,0, center(HELP + " " + str(sys.stdout.isatty()) + " " + str(MAXY) + "," + str(MAXX),MAXX),    MAXX, curses.A_REVERSE)
-	s.refresh()
-	s.addnstr(5,     4, MENU1, MAXX)
-	s.refresh()
+	s.addnstr(MAXY-2,    0, center(HELP + " " + str(sys.stdout.isatty()) + " " + str(MAXY) + "," + str(MAXX),MAXX), MAXX, curses.A_REVERSE)
 except:
 	pass
+
+s.refresh()
+time.sleep(0.2)
+s.addnstr(5,     4, MENU1, MAXX)
 
 while True:
 	s.refresh()
