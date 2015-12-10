@@ -1,57 +1,87 @@
-#!/usr/bin/python
+#!/usr/env python
 
 import pexpect
 import sys
 import logging
 import vt102
 import os
-import time 
+import time
 
-def termcheck(child, timeout=0):
-	time.sleep(0.05)
-	try:
-		logging.debug("Waiting for EOF or timeout=%d"%timeout)
-		child.expect(pexpect.EOF, timeout=timeout)
-	except pexpect.exceptions.TIMEOUT:
-		logging.debug("Hit timeout and have %d characters in child.before"%len(child.before))
+class SwearJar:
 
-	return child.before
+	def __init__(self, cmd="", dimensions=(24,80), maxread=65536, timeout=5):
+		# START LOGGING
+		logging.basicConfig(filename='swearjar.log',level=logging.DEBUG)
 
-def termkey(child, stream, screen, key, timeout=0):
-	logging.debug("Sending '%s' to child"%key)
-	child.send(key)
-	s = termcheck(child)
-	logging.debug("Sending child.before text to vt102 stream")
-	stream.process(child.before)
-	logging.debug("vt102 screen dump")
-	logging.debug(screen)
+		self.dimensions = dimensions
+		self.maxread = maxread
+		self.timeout = timeout
+		self.stream=vt102.stream()
+		self.screen=vt102.screen(dimensions)
+		self.screen.attach(self.stream)
+		self.child = pexpect.spawn(cmd, maxread=maxread, dimensions=dimensions)
+		time.sleep(1)
+		self.buffer = ""
+		self.termcheck()
 
-# START LOGGING
-logging.basicConfig(filename='menu_demo.log',level=logging.DEBUG)
+	def dumpascii(self):
+		return self.buffer
 
-# SETUP VT102 EMULATOR
-#rows, columns = os.popen('stty size', 'r').read().split()
-rows, columns = (50,120)
-stream=vt102.stream()
-screen=vt102.screen((int(rows), int(columns)))
-screen.attach(stream)
-logging.debug("Setup vt102 with %d %d"%(int(rows),int(columns)))
+	# This should allow you to pass a series of functions
+	# It'll cycle through each function and check which is true,
+	# and return the index of the first one that was true.
+	# Or maybe you pass a mapping of functions (test, response)
+	def expect(self, str, timeout=-1):
+		if timeout == -1:
+			timeout = self.timeout
+
+		go = True
+		start = time.clock()
+		end = start + timeout
+		logging.debug("Starting at %f and waiting until %f"%(start,end))
+
+		while go:
+			self.buffer = self.termcheck(timeout)
+			for line in self.screen.display:
+				# logging.debug("Looking at at '%s'"%line)
+				#TODO: I don't think this is working
+				if str in line:
+					go = False
+					logging.debug("expect() found %s", str)
+					logging.debug(repr(self.buffer))
+			time.sleep(0.05)
+
+			if time.clock() > end:
+				logging.debug("expect() timed out!")
+				go = False
+
+		pass
 
 
-logging.debug("Starting demo2.py child process...")
-child = pexpect.spawn('./demo2.py', maxread=65536, dimensions=(int(rows),int(columns)))
+	# There should be some helper functions like:
+	# expect_row (row=x, regexp=r)
 
-s = termcheck(child)
-logging.debug("Sending child.before (len=%d) text to vt102 stream"%len(child.before))
-stream.process(child.before)
-logging.debug("vt102 screen dump")
-logging.debug(screen)
+	# TODO: Maybe should just be using self.child.read(1) hear,
+	# with a check on the timeout.  Then we know exactly which characters were read, and
+	# we can pass that character one at a time to the vt102 stream.
+	def termcheck(self, timeout=0):
+		time.sleep(0.05)
+		try:
+			logging.debug("Waiting for EOF or timeout=%d"%timeout)
+			self.child.expect(pexpect.EOF, timeout=timeout)
+		except pexpect.exceptions.TIMEOUT:
+			logging.debug("Hit timeout and have %d characters in child.before"%len(self.child.before))
 
-termkey(child, stream, screen, "a")
-termkey(child, stream, screen, "1")
+		# NEED TO KNOW IF WE NEED TO PROCESS NEW CHARACTERS
+		if self.buffer != self.child.before:
+			self.stream.process(self.child.before)
+			self.buffer = self.child.before
 
-logging.debug("Quiting...")
-
-
-
-
+	def termkey(self, child, stream, screen, key, timeout=0):
+		logging.debug("Sending '%s' to child"%key)
+		child.send(key)
+		s = termcheck(child)
+		logging.debug("Sending child.before text to vt102 stream")
+		stream.process(child.before)
+		logging.debug("vt102 screen dump")
+		logging.debug(screen)

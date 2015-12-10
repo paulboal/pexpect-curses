@@ -14,6 +14,8 @@ logging.basicConfig(filename='example.log',level=logging.DEBUG)
 
 WELCOME="Chronicles Main Menu"
 HELP="<Help> - Instructions"
+MENU1="1. Edit Data"
+
 
 def center(s,n):
 	return " "*int(math.floor((n-1-len(s))/2)) + s + " "*(n-len(s)-int(math.floor((n-1-len(s))/2)))
@@ -28,6 +30,7 @@ MAXY,MAXX = s.getmaxyx()
 
 try:
 	s.addnstr(0,     0, center(WELCOME,MAXX), MAXX, curses.A_REVERSE)
+	s.addnstr(5,     4, MENU1, MAXX)
 	s.addnstr(MAXY-2,0, center(HELP + " " + str(sys.stdout.isatty()) + " " + str(MAXY) + "," + str(MAXX),MAXX),    MAXX, curses.A_REVERSE)
 except:
 	pass
@@ -43,5 +46,3 @@ while True:
 		pass
 
 curses.endwin()
-
-
