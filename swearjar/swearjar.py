@@ -20,12 +20,10 @@ class SwearJar:
 		self.screen=vt102.screen(dimensions)
 		self.screen.attach(self.stream)
 		self.child = pexpect.spawn(cmd, maxread=maxread, dimensions=dimensions)
-		time.sleep(1)
-		self.buffer = ""
-		self.termcheck()
+		# time.sleep(1)
 
-	def dumpascii(self):
-		return self.buffer
+	def ascii(self):
+		return self.screen
 
 	# This should allow you to pass a series of functions
 	# It'll cycle through each function and check which is true,
@@ -39,49 +37,34 @@ class SwearJar:
 		start = time.clock()
 		end = start + timeout
 		logging.debug("Starting at %f and waiting until %f"%(start,end))
+		pos = (-1,-1)
 
 		while go:
-			self.buffer = self.termcheck(timeout)
+			self._termcheck()
+			r = 0
 			for line in self.screen.display:
-				# logging.debug("Looking at at '%s'"%line)
-				#TODO: I don't think this is working
-				if str in line:
+				c = line.find(str)
+				if c != -1:
 					go = False
-					logging.debug("expect() found %s", str)
-					logging.debug(repr(self.buffer))
-			time.sleep(0.05)
+					logging.debug("expect() found '%s' at %d, %d", str, r, c)
+					pos = (r, c)
+			r = r + 1
+			# time.sleep(0.05)
 
 			if time.clock() > end:
 				logging.debug("expect() timed out!")
 				go = False
 
-		pass
-
+		return pos
 
 	# There should be some helper functions like:
 	# expect_row (row=x, regexp=r)
 
-	# TODO: Maybe should just be using self.child.read(1) hear,
-	# with a check on the timeout.  Then we know exactly which characters were read, and
-	# we can pass that character one at a time to the vt102 stream.
-	def termcheck(self, timeout=0):
-		time.sleep(0.05)
+	def _termcheck(self, timeout=0):
 		try:
-			logging.debug("Waiting for EOF or timeout=%d"%timeout)
-			self.child.expect(pexpect.EOF, timeout=timeout)
+			c = self.child.read_nonblocking(1, timeout)
+			self.stream.consume(c)
+			logging.debug("Processed character: %d"%ord(c))
+			logging.debug(self.screen)
 		except pexpect.exceptions.TIMEOUT:
-			logging.debug("Hit timeout and have %d characters in child.before"%len(self.child.before))
-
-		# NEED TO KNOW IF WE NEED TO PROCESS NEW CHARACTERS
-		if self.buffer != self.child.before:
-			self.stream.process(self.child.before)
-			self.buffer = self.child.before
-
-	def termkey(self, child, stream, screen, key, timeout=0):
-		logging.debug("Sending '%s' to child"%key)
-		child.send(key)
-		s = termcheck(child)
-		logging.debug("Sending child.before text to vt102 stream")
-		stream.process(child.before)
-		logging.debug("vt102 screen dump")
-		logging.debug(screen)
+			logging.debug("Hit timeout")

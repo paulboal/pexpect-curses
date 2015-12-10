@@ -30,8 +30,10 @@ MAXY,MAXX = s.getmaxyx()
 
 try:
 	s.addnstr(0,     0, center(WELCOME,MAXX), MAXX, curses.A_REVERSE)
-	s.addnstr(5,     4, MENU1, MAXX)
 	s.addnstr(MAXY-2,0, center(HELP + " " + str(sys.stdout.isatty()) + " " + str(MAXY) + "," + str(MAXX),MAXX),    MAXX, curses.A_REVERSE)
+	s.refresh()
+	s.addnstr(5,     4, MENU1, MAXX)
+	s.refresh()
 except:
 	pass
 
