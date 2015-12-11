@@ -1,4 +1,15 @@
-#!/usr/env python
+# -*- coding: utf-8 -*-
+
+# Meta
+__version__ = '0.1'
+__version_info__ = (0, 1)
+__license__ = "TBD"
+__author__ = 'Paul Boal <paul.boal@gmail.com>'
+
+__doc__ = """\
+See README.md
+"""
+
 import pexpect
 import sys
 import logging
@@ -6,9 +17,9 @@ import vt102
 import os
 import time
 
+# TODO: Decide how to properly integrate this
 sys.path.append ("/Users/paul/Documents/Workspace/GateOne/")
 import terminal
-
 
 class SwearJar:
 
