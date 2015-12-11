@@ -84,5 +84,7 @@ class SwearJar:
 			self.stream.consume(c)
 			logging.debug("Processed character: %d"%ord(c))
 			logging.debug(self.screen)
+		except vt102.StreamProcessError:
+			logging.debug("StreamProcessError on %d"%ord(c))
 		except pexpect.exceptions.TIMEOUT:
 			logging.debug("Hit timeout")
