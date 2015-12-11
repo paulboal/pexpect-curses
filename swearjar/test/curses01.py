@@ -31,7 +31,7 @@ MAXY,MAXX = s.getmaxyx()
 
 try:
 	s.addnstr(0,     0, center(WELCOME,MAXX), MAXX, curses.A_REVERSE)
-	s.addnstr(MAXY-2,    0, center(HELP + " " + str(sys.stdout.isatty()) + " " + str(MAXY) + "," + str(MAXX),MAXX), MAXX, curses.A_REVERSE)
+	s.addnstr(MAXY-1,    0, center(HELP + " " + str(sys.stdout.isatty()) + " " + str(MAXY) + "," + str(MAXX),MAXX), MAXX, curses.A_REVERSE)
 except:
 	pass
 
@@ -45,7 +45,7 @@ while True:
 	if chr(k) == 'q': break
 
 	try:
-		s.addnstr(MAXY-2,0, center(HELP + " YOU PRESSED A KEY: " + chr(k) + " <" + str(MAXY) + "," + str(MAXX) + ">" ,MAXX),    MAXX, curses.A_REVERSE)
+		s.addnstr(MAXY-1,0, center(HELP + " YOU PRESSED A KEY: " + chr(k) + " <" + str(MAXY) + "," + str(MAXX) + ">" ,MAXX),    MAXX, curses.A_REVERSE)
 	except:
 		pass
 

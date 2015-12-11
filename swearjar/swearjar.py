@@ -6,6 +6,10 @@ import vt102
 import os
 import time
 
+sys.path.append ("/Users/paul/Documents/Workspace/GateOne/")
+import terminal
+
+
 class SwearJar:
 
 	def __init__(self, cmd="", dimensions=(24,80), maxread=65536, timeout=5):
@@ -15,14 +19,12 @@ class SwearJar:
 		self.dimensions = dimensions
 		self.maxread = maxread
 		self.timeout = timeout
-		self.stream=vt102.stream()
-		self.screen=vt102.screen(dimensions)
-		self.screen.attach(self.stream)
+		self.term = terminal.Terminal(dimensions[0],dimensions[1])
 		self.child = pexpect.spawn(cmd, maxread=maxread, dimensions=dimensions)
 		# time.sleep(1)
 
 	def ascii(self):
-		return self.screen
+		return self.term.dump()
 
 	# Locate a specific piece of data somewhere in the buffer
 	# By default search is order is from top left to bottom right
@@ -30,7 +32,7 @@ class SwearJar:
 	def locate(self, str):
 		pos = (-1,-1)
 		r = 0
-		for line in self.screen.display:
+		for line in self.term.dump():
 			c = line.find(str)
 			if c != -1:
 				logging.debug("locate() found '%s' at %d, %d", str, r, c)
@@ -81,10 +83,8 @@ class SwearJar:
 	def _termcheck(self, timeout=0):
 		try:
 			c = self.child.read_nonblocking(1, timeout)
-			self.stream.consume(c)
+			self.term.write(c, special_checks=False)
 			logging.debug("Processed character: %d"%ord(c))
-			logging.debug(self.screen)
-		except vt102.StreamProcessError:
-			logging.debug("StreamProcessError on %d"%ord(c))
+			logging.debug(self.term.dump())
 		except pexpect.exceptions.TIMEOUT:
 			logging.debug("Hit timeout")

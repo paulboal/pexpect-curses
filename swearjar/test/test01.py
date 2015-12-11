@@ -2,10 +2,8 @@
 import sys
 import logging
 sys.path.append ("../../")
-sys.path.append ("/Users/paul/Documents/Workspace/GateOne/")
 
 import swearjar
-import terminal
 
 
 t = swearjar.SwearJar(cmd="./curses01.py")
