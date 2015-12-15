@@ -33,6 +33,10 @@ WELCOME="Main Menu"
 MENU_HELP="Enter the menu item you want to select"
 MENU=["New Person","Edit Person","Delete Person","Exit"]
 
+WELCOME_NEW="Enter New Information"
+NEW_HELP="Key in the new information.  Press <tab> to change fields and <enter> to save."
+FIELDS=["First Name","Last Name","Identifier","Address","City","State","Zip"]
+
 def center_text(s,n):
 	return " "*int(math.floor((n-1-len(s))/2)) + s + " "*(n-len(s)-int(math.floor((n-1-len(s))/2)))
 
@@ -59,7 +63,7 @@ def paint_menu():
     r = 5
     i = 1
     for item in MENU:
-        s.addnstr(r,     4, str(i) + ". " + item, MAXX)
+        safe_addnstr(s, r,     4, str(i) + ". " + item, MAXX)
         r = r + 2
         i = i + 1
 
@@ -72,6 +76,22 @@ def new_person(s):
     logging.debug("called new person")
     safe_clearline(s, MAXY-1)
     safe_addnstr(s,MAXY-1,0,"OK, Let's add a new person!", MAXX)
+    time.sleep(1)
+
+    s.clear()
+    safe_addnstr(s, 0,         0, center_text(WELCOME_NEW,MAXX), MAXX, curses.A_REVERSE)
+    safe_addnstr(s, MAXY-1,    0, NEW_HELP, MAXX)
+
+    r = 5
+    i = 1
+    for item in FIELDS:
+        safe_addnstr(s, r, 4, item, MAXX)
+        r = r + 1
+        i = i + 1
+
+    #TODO: Create Window and TextBox objects next to each label
+
+
     return True
 
 def edit_person(s):
@@ -96,6 +116,8 @@ def invalid_option(s,c):
 def end(s):
     return False
 
+
+## This is main()
 s = curses.initscr()
 curses.curs_set(0)
 curses.noecho()
