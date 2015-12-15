@@ -13,6 +13,22 @@ import time
 
 logging.basicConfig(filename='example.log',level=logging.DEBUG)
 
+__doc__="""\
+The program presents a series of menus that we're going to use for testing.
+1. Enter new person
+2. Update person
+3. Search for person
+4. Delete person
+
+The tests will navigate through the menu options and perform various actions.
+Below are the test numbers and their corresponding activities.  This series of
+tests simulates several data entry scenarios.
+
+  1. After the main menu loads, type "1" to select the option to enter a new person.
+  2. On the Enter New Person screen, type in First Name, Last Name, Phone numbers
+     with tabs in between to shift fields.
+"""
+
 WELCOME="Chronicles Main Menu"
 HELP="<Help> - Instructions"
 MENU1="1. Edit Data"
