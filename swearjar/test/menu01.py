@@ -10,6 +10,7 @@ import termios
 import array
 import logging
 import time
+import curses.textpad
 
 logging.basicConfig(filename='menu01.log',level=logging.DEBUG)
 
@@ -82,10 +83,16 @@ def new_person(s):
     safe_addnstr(s, 0,         0, center_text(WELCOME_NEW,MAXX), MAXX, curses.A_REVERSE)
     safe_addnstr(s, MAXY-1,    0, NEW_HELP, MAXX)
 
+    textwins = {}
+    textboxes = {}
+
     r = 5
     i = 1
     for item in FIELDS:
         safe_addnstr(s, r, 4, item, MAXX)
+        textwins[item] = curses.newwin(1, MAXX - 6 - len(item), r, 6 + len(item))
+        textboxes[item] = curses.textpad.Textbox(textwins[item])
+        textboxes[item]
         r = r + 1
         i = i + 1
 
@@ -94,6 +101,12 @@ def new_person(s):
     #TODO: Capture <tab> to move to next box
     #TODO: Capture <enter> to save the results and return to the main screen
 
+    curses.curs_set(1)
+    textboxes['First Name'].edit()
+
+    safe_clearline(s, MAXY-1)
+    safe_addnstr(s,MAXY-1,0,"Returning to main menu", MAXX)
+    time.sleep(1)
     return True
 
 def edit_person(s):
