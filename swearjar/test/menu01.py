@@ -90,7 +90,9 @@ def new_person(s):
         i = i + 1
 
     #TODO: Create Window and TextBox objects next to each label
-
+    #TODO: Place the cursor, visible in the first box
+    #TODO: Capture <tab> to move to next box
+    #TODO: Capture <enter> to save the results and return to the main screen
 
     return True
 
