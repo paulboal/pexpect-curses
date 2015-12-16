@@ -85,15 +85,18 @@ def new_person(s):
 
     textwins = {}
     textboxes = {}
+    values = {}
 
     r = 5
     i = 1
     for item in FIELDS:
         safe_addnstr(s, r, 4, item, MAXX)
-        textwins[item] = curses.newwin(1, MAXX - 6 - len(item), r, 6 + len(item))
+        logging.debug("Creating data entry box for %s on row %d"%(item,r-1))
+        textwins[item] = curses.newwin(3, MAXX - 6 - 20, r-1, 20)
+        textwins[item].box()
+        textwins[item].move(1,2)
         textboxes[item] = curses.textpad.Textbox(textwins[item])
-        textboxes[item]
-        r = r + 1
+        r = r + 3
         i = i + 1
 
     #TODO: Create Window and TextBox objects next to each label
@@ -102,11 +105,15 @@ def new_person(s):
     #TODO: Capture <enter> to save the results and return to the main screen
 
     curses.curs_set(1)
-    textboxes['First Name'].edit()
+    for item in FIELDS:
+        values[item] = textboxes[item].edit()
 
+    curses.curs_set(0)
     safe_clearline(s, MAXY-1)
     safe_addnstr(s,MAXY-1,0,"Returning to main menu", MAXX)
     time.sleep(1)
+    s.clear()
+
     return True
 
 def edit_person(s):
@@ -139,9 +146,8 @@ curses.noecho()
 MAXY,MAXX = s.getmaxyx()
 loop = True
 
-paint_menu()
-
 while loop:
+    paint_menu()
     c = chr(get_input(s))
     options = {'1' : new_person,
                '2' : edit_person,
