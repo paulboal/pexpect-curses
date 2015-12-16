@@ -114,19 +114,21 @@ def new_person(s):
     time.sleep(1)
     s.clear()
 
-    return True
+    return values
 
 def edit_person(s):
+    values = {}
     logging.debug("called edit person")
     safe_clearline(s, MAXY-1)
     safe_addnstr(s,MAXY-1,0,"OK, Let's edit an existing person!", MAXX)
-    return True
+    return values
 
 def delete_person(s):
+    values = {}
     logging.debug("called delete person")
     safe_clearline(s, MAXY-1)
     safe_addnstr(s,MAXY-1,0,"You want to delete someone!  :(", MAXX)
-    return True
+    return values
 
 def invalid_option(s,c):
     logging.debug("called invalid option '%s'"%c)
@@ -145,6 +147,7 @@ curses.curs_set(0)
 curses.noecho()
 MAXY,MAXX = s.getmaxyx()
 loop = True
+values = {}
 
 while loop:
     paint_menu()
@@ -155,8 +158,11 @@ while loop:
                '4' : end}
 
     if c in options.keys():
-        loop = options[c](s)
+        values = options[c](s)
+        loop = True
     else:
         loop = invalid_option(s,c)
 
 curses.endwin()
+
+print values
