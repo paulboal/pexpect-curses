@@ -1,16 +1,8 @@
 #!/usr/bin/python
 
-import curses
-import math
-import os
-import sys
-import fcntl
-import struct
-import termios
-import array
+import curses, curses.textpad, curses.ascii
+import math, os, sys, fcntl, struct, termios, array, time
 import logging
-import time
-import curses.textpad
 
 logging.basicConfig(filename='menu01.log',level=logging.DEBUG)
 
@@ -56,6 +48,13 @@ def safe_clearline(screen, r):
         logging.debug("Error clearingline %d"%r)
         pass
 
+def textbox_validator(c):
+    # Replace <tab> with ^g
+    if c == curses.ascii.TAB:
+        return curses.ascii.ctrl(ord('g'))
+    return c
+
+
 # Paint the menu screen
 def paint_menu():
     safe_addnstr(s, 0,         0, center_text(WELCOME,MAXX), MAXX, curses.A_REVERSE)
@@ -92,9 +91,11 @@ def new_person(s):
     for item in FIELDS:
         safe_addnstr(s, r, 4, item, MAXX)
         logging.debug("Creating data entry box for %s on row %d"%(item,r-1))
-        textwins[item] = curses.newwin(3, MAXX - 6 - 20, r-1, 20)
-        textwins[item].box()
-        textwins[item].move(1,2)
+        box = curses.newwin(3, MAXX - 6 - 20, r-1, 20)
+        box.box()
+        box.refresh()
+        textwins[item] = curses.newwin(1, MAXX - 6 - 22, r, 22)
+        textwins[item].refresh()
         textboxes[item] = curses.textpad.Textbox(textwins[item])
         r = r + 3
         i = i + 1
@@ -106,7 +107,8 @@ def new_person(s):
 
     curses.curs_set(1)
     for item in FIELDS:
-        values[item] = textboxes[item].edit()
+        textwins[item].refresh()
+        values[item] = textboxes[item].edit(textbox_validator)
 
     curses.curs_set(0)
     safe_clearline(s, MAXY-1)
@@ -157,11 +159,15 @@ while loop:
                '3' : delete_person,
                '4' : end}
 
-    if c in options.keys():
+    if c in options.keys() and c != '4':
         values = options[c](s)
         loop = True
     else:
-        loop = invalid_option(s,c)
+        if c == '4':
+            loop = False
+        else:
+            loop = invalid_option(s,c)
+
 
 curses.endwin()
 
